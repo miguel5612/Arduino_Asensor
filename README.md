@@ -17,6 +17,7 @@ Pin | Cable
 
 # Alimentacion:
 12V @ 3A Adaptador DC
+
 5V Arduino.
 
 # Codificacion del cableado 12Voltios
