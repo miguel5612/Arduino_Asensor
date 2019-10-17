@@ -18,3 +18,8 @@ Pin | Cable
 # Alimentacion:
 12V @ 3A Adaptador DC
 5V Arduino.
+
+# Codificacion del cableado 12Voltios
+
+Blanco - cafe -> Negativo de 12 Voltios (-)
+Cafe -> Positivo 12 V (+)
