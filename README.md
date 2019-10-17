@@ -22,4 +22,5 @@ Pin | Cable
 # Codificacion del cableado 12Voltios
 
 Blanco - cafe -> Negativo de 12 Voltios (-)
+
 Cafe -> Positivo 12 V (+)
