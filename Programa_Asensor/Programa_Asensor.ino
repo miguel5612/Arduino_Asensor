@@ -1,7 +1,7 @@
 #include <TM1637Display.h>
 
-#define stepsPerRev 200 //Pasos por revolucion
-#define revsPerFloor 5 //RPM para subir o bajar un piso
+#define stepsPerRev 210 //Pasos por revolucion
+#define revsPerFloor 3 //RPM para subir o bajar un piso
 #define dirDescending LOW //Cambiar si el asensor baja en lugar de subir
 
 #define stepPin 2
@@ -10,10 +10,13 @@
 // Module connection pins (Digital Pins)
 #define CLK 5
 #define DIO 6
-#define btnPiso1 6
-#define btnPiso2 7
-#define btnPiso3 8
-
+#define btnPiso1 8
+#define btnPiso2 9
+#define btnPiso3 10
+#define ledPiso1 11
+#define ledPiso2 12
+#define ledPiso3 13
+#define delayUs 1500
 
 int pisoActual = 1;
 int pisoDeseado = 1;
@@ -41,6 +44,10 @@ void setup() {
   pinMode(btnPiso1, INPUT_PULLUP);
   pinMode(btnPiso2, INPUT_PULLUP);
   pinMode(btnPiso3, INPUT_PULLUP);
+  pinMode(ledPiso1, OUTPUT);
+  pinMode(ledPiso2, OUTPUT);
+  pinMode(ledPiso3, OUTPUT);
+  
   Serial.begin(9600);
   
   display.setBrightness(0x0f);
@@ -49,16 +56,16 @@ void setup() {
   display.setSegments(data);
   while(buscarPiso())
   {
-    Serial.println("Buscando piso 1"); 
+    Serial.println("Buscando Primer Piso"); 
     display.setSegments(SEG_SCH);
   }
   display.setSegments(SEG_DONE);
-  delay(500);
+  delay(delayUs);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(pisoActual = pisoDeseado) noMover();
+  if(pisoActual == pisoDeseado) noMover();
   else if(pisoActual<pisoDeseado) subir();
   else if(pisoActual>pisoDeseado) bajar();
   leerBotones();
@@ -68,38 +75,57 @@ void leerBotones()
   if(!digitalRead(btnPiso1)) pisoDeseado = 1;
   else if(!digitalRead(btnPiso2)) pisoDeseado = 2;
   else if(!digitalRead(btnPiso3)) pisoDeseado = 3;
+
+  if(pisoActual!=pisoDeseado)
+  {
+    if(pisoDeseado == 1) digitalWrite(ledPiso1, HIGH);
+    else if(pisoDeseado == 2) digitalWrite(ledPiso2, HIGH);
+    else if(pisoDeseado == 3) digitalWrite(ledPiso3, HIGH);
+  }
+  else
+  {
+    digitalWrite(ledPiso1, LOW);
+    digitalWrite(ledPiso2, LOW);
+    digitalWrite(ledPiso3, LOW);
+  }
+  Serial.println("Botones");
+  Serial.println("Boton Piso 1: " + String(!digitalRead(btnPiso1)?"Presionado":"No Presionado"));
+  Serial.println("Boton Piso 2: " + String(!digitalRead(btnPiso2)?"Presionado":"No Presionado"));
+  Serial.println("Boton Piso 3: " + String(!digitalRead(btnPiso3)?"Presionado":"No Presionado"));
 }
 
 void subir()
 {
+  Serial.println("Subiendo de piso!");
   digitalWrite(dirPin,!dirDescending); //Changes the rotations direction
-  for(int x = 0; x < stepsPerRev*revsPerFloor; x++) {
+  for(int x = 0; x <= stepsPerRev*revsPerFloor; x++) {
     digitalWrite(stepPin,HIGH);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
     digitalWrite(stepPin,LOW);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
   }
   pisoActual++;
   imprimirPiso();
 }
 void bajar()
 {
+  Serial.println("Subiendo de piso!" + String(stepsPerRev*revsPerFloor));
   digitalWrite(dirPin,dirDescending); //Changes the rotations direction
-  for(int x = 0; x < stepsPerRev*revsPerFloor; x++) {
+  for(int x = 0; x <= stepsPerRev*revsPerFloor; x++) {
     digitalWrite(stepPin,HIGH);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
     digitalWrite(stepPin,LOW);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
   }
   pisoActual--;
  imprimirPiso(); 
 }
 void noMover()
 {
-  digitalWrite(stepPin,true);
-  delayMicroseconds(5);
+  digitalWrite(stepPin,false);
   imprimirPiso(); 
   lastDir = !lastDir;
+  Serial.println("No mover!");
 }
 void imprimirPiso()
 {
@@ -108,11 +134,11 @@ void imprimirPiso()
 boolean buscarPiso()
 {
   digitalWrite(dirPin,dirDescending); //Changes the rotations direction
-  for(int x = 0; x < stepsPerRev/4; x++) {
+  for(int x = 0; x <= stepsPerRev/4; x++) {
     digitalWrite(stepPin,HIGH);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
     digitalWrite(stepPin,LOW);
-    delayMicroseconds(500);
+    delayMicroseconds(delayUs);
   }
   return digitalRead(fotoSensorPin);
 }
